@@ -1,0 +1,17 @@
+Dockerfile
+README.md
+.git
+.gitignore
+.claude
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.venv
+node_modules
+.DS_Store
