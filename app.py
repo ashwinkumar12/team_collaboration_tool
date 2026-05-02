@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 import datetime
 import random
+import os
 
 app = Flask(__name__)
 
@@ -98,4 +99,6 @@ def index():
                            current_time=datetime.datetime.now().strftime("%b %d, %Y | %I:%M %p IST"))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Cloud Run expects the app to listen on the port defined by the PORT environment variable.
+    port = int(os.environ.get('PORT', 8080))
+    app.run(debug=False, host='0.0.0.0', port=port)
