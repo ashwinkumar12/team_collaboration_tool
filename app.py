@@ -1,60 +1,67 @@
 from flask import Flask, render_template
+import datetime
 
 app = Flask(__name__)
 
-def sync_with_google_services():
-    """Mock integration point for Google Services"""
-    print("[LOG] Syncing with Google Services...")
-    print("[LOG] - Fetching events from Google Calendar API...")
-    print("[LOG] - Extracting standup transcripts from Google Meet...")
-    print("[LOG] Sync complete.")
-
 def get_mock_data():
     """Return mocked data for the dashboard"""
+    # Generate next 7 days
+    today = datetime.date(2026, 5, 2)
+    days = []
+    for i in range(7):
+        current_date = today + datetime.timedelta(days=i)
+        # format like 2/5/26
+        formatted_date = f"{current_date.day}/{current_date.month}/{current_date.strftime('%y')}"
+        days.append(formatted_date)
+        
     team_members = [
         {
-            "name": "Alice",
-            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice&backgroundColor=b6e3f4",
-            "load_score": 85,
+            "name": "Ashwin",
+            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ashwin&backgroundColor=b6e3f4",
+            "load_score": 75,
+            "mood_emoji": "⚡",
+            "status_summary": "4 Meetings, 2 High Priority Tasks",
+            "tasks": [
+                {"id": 1, "title": "Refactor Payment API", "date": days[0], "status": "In Progress", "complexity": 4, "description": "Rewrite the payment processing logic."},
+                {"id": 2, "title": "API Docs", "date": days[0], "status": "To Do", "complexity": 2, "description": "Update swagger docs."},
+                {"id": 3, "title": "Code Review", "date": days[0], "status": "To Do", "complexity": 1, "description": "Review PRs for the backend."},
+                {"id": 4, "title": "Write Integration Tests", "date": days[1], "status": "To Do", "complexity": 3, "description": "Tests for the new payment endpoints."}
+            ]
+        },
+        {
+            "name": "Lokesh",
+            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Lokesh&backgroundColor=ffdfbf",
+            "load_score": 90,
             "mood_emoji": "🔥",
-            "current_status": "Deep work"
+            "status_summary": "6 Meetings, 5 High Priority Tasks",
+            "tasks": [
+                {"id": 5, "title": "Database Migration", "date": days[0], "status": "In Progress", "complexity": 5, "description": "Migrate users table to PostgreSQL."},
+                {"id": 6, "title": "Setup CI/CD", "date": days[0], "status": "To Do", "complexity": 3, "description": "Configure GitHub Actions."},
+                {"id": 7, "title": "Fix Auth Bug", "date": days[1], "status": "To Do", "complexity": 4, "description": "Session token expiration issue."},
+                {"id": 8, "title": "Standup", "date": days[1], "status": "Completed", "complexity": 1, "description": "Daily sync."}
+            ]
         },
         {
-            "name": "Bob",
-            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob&backgroundColor=ffdfbf",
+            "name": "Aarthi",
+            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Aarthi&backgroundColor=c0aede",
             "load_score": 40,
-            "mood_emoji": "☕",
-            "current_status": "Reviewing PRs"
-        },
-        {
-            "name": "Charlie",
-            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie&backgroundColor=c0aede",
-            "load_score": 60,
-            "mood_emoji": "🚀",
-            "current_status": "Planning sprint"
+            "mood_emoji": "✨",
+            "status_summary": "2 Meetings, 1 High Priority Task",
+            "tasks": [
+                {"id": 9, "title": "UI Mockups", "date": days[2], "status": "In Progress", "complexity": 2, "description": "Design new dashboard components."}
+            ]
         }
     ]
     
-    sticky_notes = [
-        {"id": 1, "user": "Alice", "content": "Finish the API integration for the payment gateway.", "type": "task", "bucket_date": "Monday", "linked_user": None},
-        {"id": 2, "user": "Bob", "content": "Can someone help me debug the Redis cache latency?", "type": "help", "bucket_date": "Tuesday", "linked_user": "Alice"},
-        {"id": 3, "user": "Charlie", "content": "Completed the onboarding flow, moving to analytics.", "type": "standup", "bucket_date": "Monday", "linked_user": None},
-        {"id": 4, "user": "Alice", "content": "Update docs for the new API endpoints.", "type": "task", "bucket_date": "Wednesday", "linked_user": None},
-        {"id": 5, "user": "Charlie", "content": "I'm stuck on the CI/CD pipeline issue in staging.", "type": "help", "bucket_date": "Thursday", "linked_user": "Bob"},
-        {"id": 6, "user": "Bob", "content": "Reviewed Alice's PR, looks good. Starting on the metrics dashboard.", "type": "standup", "bucket_date": "Friday", "linked_user": None},
-        {"id": 7, "user": "Alice", "content": "Research new auth providers.", "type": "task", "bucket_date": "Friday", "linked_user": None},
-    ]
-    
-    return {"team_members": team_members, "sticky_notes": sticky_notes}
+    return {"team_members": team_members, "days": days}
 
 @app.route('/')
 def index():
-    sync_with_google_services()
     data = get_mock_data()
     return render_template('index.html', 
                            team_members=data["team_members"], 
-                           sticky_notes=data["sticky_notes"],
-                           days=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
+                           days=data["days"],
+                           current_time=datetime.datetime.now().strftime("%b %d, %Y | %I:%M %p IST"))
 
 if __name__ == '__main__':
     app.run(debug=True)
