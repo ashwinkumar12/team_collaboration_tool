@@ -97,5 +97,8 @@ def index():
                            days=data["days"],
                            current_time=datetime.datetime.now().strftime("%b %d, %Y | %I:%M %p IST"))
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=True)
