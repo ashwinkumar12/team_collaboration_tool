@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Pulse Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .font-handwriting {
+            font-family: 'Caveat', cursive;
+        }
+        .sticky-note {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .sticky-note:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 10;
+        }
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-6 flex flex-col gap-8">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-50 flex items-center gap-3" aria-live="polite">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <span id="toast-message" class="font-medium tracking-wide"></span>
+    </div>
+
+    <!-- Header: The Pulse -->
+    <header class="bg-white/80 backdrop-blur-md border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900">Team Pulse</h1>
+            <p class="text-slate-500 font-medium mt-1">Live updates & whiteboard</p>
+        </div>
+        
+        <div class="flex gap-8 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+            {% for member in team_members %}
+            <div class="flex flex-col items-center gap-3 min-w-[100px]" aria-label="Team member {{ member.name }}">
+                <div class="relative group">
+                    <img src="{{ member.avatar_url }}" alt="{{ member.name }}'s Avatar" class="w-16 h-16 rounded-full border-4 border-white shadow-md bg-white">
+                    <div class="absolute -bottom-2 -right-2 text-xl bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm border border-slate-100" aria-label="Mood: {{ member.mood_emoji }}">
+                        {{ member.mood_emoji }}
+                    </div>
+                    <!-- Tooltip -->
+                    <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs py-1 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        {{ member.current_status }}
+                    </div>
+                </div>
+                
+                <div class="w-full text-center">
+                    <div class="text-sm font-bold text-slate-800">{{ member.name }}</div>
+                    
+                    <!-- Load Score Bar -->
+                    <div class="mt-2 w-full bg-slate-100 rounded-full h-2 shadow-inner overflow-hidden" aria-label="Load score: {{ member.load_score }}%">
+                        <div class="h-2 rounded-full {% if member.load_score > 75 %}bg-rose-400{% elif member.load_score > 40 %}bg-amber-400{% else %}bg-emerald-400{% endif %}" style="width: {{ member.load_score }}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </header>
+
+    <!-- Main: The Board -->
+    <main class="flex-1">
+        <section class="grid grid-cols-1 md:grid-cols-5 gap-6 h-full" aria-label="Weekly Board">
+            {% for day in days %}
+            <div class="bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-slate-200/60 min-h-[500px] flex flex-col gap-4">
+                <h2 class="text-lg font-bold text-slate-700 uppercase tracking-wider text-center pb-3 border-b-2 border-slate-200 border-dashed">{{ day }}</h2>
+                
+                <div class="flex-1 flex flex-col gap-4 mt-2">
+                    {% for note in sticky_notes %}
+                        {% if note.bucket_date == day %}
+                            {% set rotation = range(-3, 4) | random %}
+                            
+                            <!-- Note Classes based on Type -->
+                            {% set note_bg = 'bg-yellow-200/90' %}
+                            {% set note_border = 'border-yellow-300' %}
+                            {% set note_shadow = 'shadow-[2px_4px_10px_rgba(253,224,71,0.3)]' %}
+                            
+                            {% if note.type == 'help' %}
+                                {% set note_bg = 'bg-rose-200/90' %}
+                                {% set note_border = 'border-rose-300' %}
+                                {% set note_shadow = 'shadow-[2px_4px_10px_rgba(254,205,211,0.3)]' %}
+                            {% elif note.type == 'standup' %}
+                                {% set note_bg = 'bg-sky-200/90' %}
+                                {% set note_border = 'border-sky-300' %}
+                                {% set note_shadow = 'shadow-[2px_4px_10px_rgba(186,230,253,0.3)]' %}
+                            {% endif %}
+
+                            <article class="sticky-note relative {{ note_bg }} border border-t-0 border-l-0 border-b-4 border-r-4 {{ note_border }} {{ note_shadow }} p-5 rounded-bl-3xl rounded-tr-sm rounded-tl-sm rounded-br-sm cursor-pointer group" style="transform: rotate({{ rotation }}deg);" aria-label="{{ note.type|capitalize }} Note by {{ note.user }}">
+                                
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold uppercase tracking-widest text-slate-600/70">{{ note.user }}</span>
+                                    {% if note.type == 'help' %}
+                                        <span class="w-3 h-3 rounded-full bg-rose-500 animate-pulse" aria-label="Urgent"></span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="font-handwriting text-2xl leading-tight text-slate-800 mb-4">{{ note.content }}</p>
+                                
+                                {% if note.type == 'help' %}
+                                    <button onclick="scheduleMeet('{{ note.linked_user }}')" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors active:scale-95" aria-label="Schedule Meet with @{{ note.linked_user }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        Meet @{{ note.linked_user }}
+                                    </button>
+                                {% elif note.type == 'standup' %}
+                                    <div class="flex items-center gap-2 mt-auto pt-2 border-t border-sky-300/50" aria-label="Auto-extracted from Meet Transcript">
+                                        <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                                        <span class="text-[10px] uppercase font-bold text-sky-700">From Transcript</span>
+                                    </div>
+                                {% endif %}
+                            </article>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    </main>
+
+    <script>
+        function scheduleMeet(user) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = `Finding slot via Google Calendar API with @${user}...`;
+            
+            // Show toast
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
