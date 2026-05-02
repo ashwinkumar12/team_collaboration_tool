@@ -18,4 +18,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # The app is expected to listen on the port defined by the PORT environment variable.
 # Cloud Run sets this automatically. Default to 8080 if not set.
 ENV PORT 8080
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
+CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 app:app
