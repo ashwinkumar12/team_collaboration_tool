@@ -8,128 +8,159 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-
     <!-- Sidebar -->
     <aside class="sidebar glass">
         <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 8px;">
             <div style="width: 24px; height: 24px; background: var(--accent-color); border-radius: 6px;"></div>
-            TeamPulse
+            Team Collab
         </div>
         
         <nav style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-            <a href="#" class="nav-link active">Dashboard</a>
-            <a href="#" class="nav-link">My Tasks</a>
-            <a href="#" class="nav-link">Performance</a>
-            <a href="#" class="nav-link">Calendar View</a>
+            <div class="nav-link" onclick="switchTab('pulse-view')" id="tab-pulse-view">Collaboration Mode</div>
+            <div class="nav-link active" onclick="switchTab('dashboard-view')" id="tab-dashboard-view">Team Tasks (7 day view)</div>
+
         </nav>
         
         <nav style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
-            <a href="#" class="nav-link">Settings</a>
-            <a href="#" class="nav-link">Help & Support</a>
+            <div class="nav-link">Settings</div>
+            <div class="nav-link">Help & Support</div>
         </nav>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
         <!-- Topbar -->
         <header class="topbar">
             <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-secondary);">
-                Project: <span style="color: var(--text-primary);">Payment.Backend</span>
+                Project: <span style="color: var(--text-primary);">Payment Backend</span>
             </div>
-            
             <input type="text" class="search-bar" placeholder="Search tasks, members...">
-            
             <div class="global-actions">
                 <button class="btn-primary" onclick="openTaskModal()">+ Add Task</button>
-                <div style="width: 32px; height: 32px; border-radius: 50%; background: #fff; margin-left: 16px;">
-                    <!-- Placeholder Profile -->
-                </div>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #fff; margin-left: 16px;"></div>
             </div>
         </header>
 
-        <!-- Team Summary Panel -->
-        <section class="team-summary glass">
-            <div>
-                <h2>Payment.Backend</h2>
-                <div class="date-time">{{ current_time }}</div>
-            </div>
-            <div class="team-stats">
-                <div style="width: 200px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-secondary);">
-                        <span>Team Load Status</span>
-                        <span style="color: var(--success);">Healthy</span>
-                    </div>
-                    <div class="load-bar-container">
-                        <div class="load-bar" style="width: 65%; background: var(--success);"></div>
-                    </div>
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard-view" class="view-section active">
+            <section class="team-summary glass">
+                <div>
+                    <h2>Payment Backend</h2>
+                    <div class="date-time">{{ current_time }}</div>
                 </div>
-                <div class="mood-indicator">
-                    <span class="mood-emoji">🚀</span>
-                    <span class="mood-label">Team Mood: Balanced</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Timeline Container -->
-        <section class="timeline-container">
-            <!-- Timeline Header (Dates) -->
-            <div class="timeline-header">
-                {% for day in days %}
-                <div class="day-column-header">{{ day }}</div>
-                {% endfor %}
-            </div>
-
-            <!-- Members Rows -->
-            {% for member in team_members %}
-            <div class="member-row">
-                <div class="member-card glass">
-                    <div class="member-header">
-                        <img src="{{ member.avatar_url }}" alt="{{ member.name }}" class="avatar">
-                        <div class="member-info">
-                            <h3>{{ member.name }}</h3>
-                            <div class="status">{{ member.status_summary }}</div>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">
-                            <span>Load Level</span>
-                            <span>{{ member.load_score }}%</span>
+                <div class="team-stats">
+                    <div style="width: 200px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-secondary);">
+                            <span>Team Load Status</span>
+                            <span style="color: var(--success);">Healthy</span>
                         </div>
                         <div class="load-bar-container">
-                            <div class="load-bar" style="width: {{ member.load_score }}%; background: {% if member.load_score > 80 %}var(--danger){% elif member.load_score > 50 %}var(--warning){% else %}var(--success){% endif %};"></div>
+                            <div class="load-bar" style="width: 65%; background: var(--success);"></div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto;">
-                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Current Mood</span>
-                        <span style="font-size: 1.5rem;">{{ member.mood_emoji }}</span>
+                    <div class="mood-indicator">
+                        <span class="mood-emoji">🚀</span>
+                        <span class="mood-label">Team Mood: Balanced</span>
                     </div>
-                    <button class="btn-primary" style="padding: 4px 8px; font-size: 0.8rem; margin-top: 8px;" onclick="openTaskModal('{{ member.name }}')">+ Add Task</button>
                 </div>
+            </section>
 
-                <div class="timeline-days">
+            <section class="timeline-container">
+                <div class="timeline-header">
                     {% for day in days %}
-                    <div class="day-column">
-                        {% for task in member.tasks %}
-                            {% if task.date == day %}
-                            <div class="task-block" onclick="openTaskDetails('{{ task.title }}', '{{ task.status }}', '{{ task.complexity }}', '{{ member.name }}', '{{ task.description }}')">
-                                <div class="task-title">{{ task.title }}</div>
-                                <div class="task-meta">
-                                    <span style="color: {% if task.status == 'Completed' %}var(--success){% elif task.status == 'In Progress' %}var(--accent-color){% else %}var(--warning){% endif %}; font-size: 0.7rem; font-weight: 600;">{{ task.status }}</span>
-                                    <span>C: {{ task.complexity }}/5</span>
-                                </div>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                        <div class="add-task-placeholder" onclick="openTaskModal('{{ member.name }}', '{{ day }}')">+</div>
-                    </div>
+                    <div class="day-column-header">{{ day }}</div>
                     {% endfor %}
                 </div>
+                {% for member in team_members %}
+                <div class="member-row">
+                    <div class="member-card glass">
+                        <div class="member-header">
+                            <img src="{{ member.avatar_url }}" alt="{{ member.name }}" class="avatar {% if member.on_leave %}on-leave{% endif %}">
+                            <div class="member-info">
+                                <h3>{{ member.name }}</h3>
+                                <div class="status">{{ member.status_summary }}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">
+                                <span>Load Level</span>
+                                <span>{{ member.load_score }}%</span>
+                            </div>
+                            <div class="load-bar-container">
+                                <div class="load-bar" style="width: {{ member.load_score }}%; background: {% if member.load_score > 80 %}var(--danger){% elif member.load_score > 50 %}var(--warning){% else %}var(--success){% endif %};"></div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Current Mood</span>
+                            <span style="font-size: 1.5rem;">{{ member.mood_emoji }}</span>
+                        </div>
+                        <button class="btn-primary" style="padding: 4px 8px; font-size: 0.8rem; margin-top: 8px;" onclick="openTaskModal('{{ member.name }}')">+ Add Task</button>
+                    </div>
+
+                    <div class="timeline-days">
+                        {% for day in days %}
+                        <div class="day-column">
+                            {% for task in member.tasks %}
+                                {% if task.date == day %}
+                                <div class="task-block" onclick="openTaskDetails('{{ task.title }}', '{{ task.status }}', '{{ task.complexity }}', '{{ member.name }}', '{{ task.description }}')">
+                                    <div class="task-title">{{ task.title }}</div>
+                                    <div class="task-meta">
+                                        <span style="color: {% if task.status == 'Completed' %}var(--success){% elif task.status == 'In Progress' %}var(--accent-color){% else %}var(--warning){% endif %}; font-size: 0.7rem; font-weight: 600;">{{ task.status }}</span>
+                                        <span>C: {{ task.complexity }}/5</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                            <div class="add-task-placeholder" onclick="openTaskModal('{{ member.name }}', '{{ day }}')">+</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </section>
+        </div>
+
+        <!-- TEAM COLLAB VIEW -->
+        <div id="pulse-view" class="view-section">
+            <div class="pulse-container" id="pulseContainer">
+                <svg id="svg-layer"></svg>
+                
+                <div class="center-orb" onclick="openHelpModal()">
+                    <div class="center-orb-title">Need Help?</div>
+                    <div class="center-orb-sub">Find Match</div>
+                </div>
+
+                <!-- Generated via JS to apply layout -->
             </div>
-            {% endfor %}
-        </section>
+        </div>
     </main>
 
-    <!-- Task Creation Modal -->
+    <!-- Context Matcher Modal -->
+    <div class="modal-overlay" id="helpModal" onclick="closeModals(event)">
+        <div class="modal-content glass" onclick="event.stopPropagation()">
+            <h2 style="margin-bottom: 8px;">Help Request Matcher</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.9rem;">Describe what you need help with, and we'll find the best available team member.</p>
+            
+            <div class="form-group">
+                <label>Issue Description / Context</label>
+                <textarea id="helpContextInput" class="form-input" rows="3" placeholder="e.g. I need help debugging the Payment API integration..."></textarea>
+            </div>
+            
+            <button class="btn-primary" onclick="findHelpMatch()" style="width: 100%; margin-top: 12px;">Ask help</button>
+            
+            <div id="helpMatchResultContainer" style="margin-top: 24px; display: none;">
+                <label style="color: var(--text-secondary); font-size: 0.9rem;">Best Match</label>
+                <div class="help-match" id="helpMatchContent">
+                    <!-- Dynamic content injected here -->
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                <button class="btn-primary" style="background: rgba(255, 255, 255, 0.1); color: var(--text-primary);" onclick="closeModals()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (from dashboard) -->
     <div class="modal-overlay" id="taskModal" onclick="closeModals(event)">
         <div class="modal-content glass" onclick="event.stopPropagation()">
             <h2 style="margin-bottom: 24px;">Add New Task</h2>
@@ -161,22 +192,16 @@
             </div>
         </div>
     </div>
-
-    <!-- Task Details Modal (simplified for now) -->
-    <div class="modal-overlay" id="detailsModal" onclick="closeModals(event)">
-        <div class="modal-content glass" onclick="event.stopPropagation()">
-            <h2 id="dt_title" style="margin-bottom: 8px;">Task Title</h2>
-            <div style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.9rem;">
-                Assigned to: <span id="dt_assignee" style="color: var(--text-primary);"></span> | 
-                Status: <span id="dt_status" style="color: var(--accent-color);"></span>
-            </div>
-            <p id="dt_desc" style="line-height: 1.5; margin-bottom: 24px; font-size: 0.95rem;"></p>
-            <div style="display: flex; justify-content: flex-end;">
-                <button class="btn-primary" onclick="closeModals()">Close</button>
-            </div>
-        </div>
-    </div>
-
+    
+    <script>
+        // Pass server data to JS for rendering the pulse graph
+        window.TEAM_DATA = {{ team_members | tojson | safe }};
+    </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <script>
+        // Set Team Collab as default when requested
+        switchTab('pulse-view');
+    </script>
 </body>
 </html>

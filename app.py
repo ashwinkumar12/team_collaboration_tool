@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 import datetime
+import random
 
 app = Flask(__name__)
 
@@ -16,11 +17,14 @@ def get_mock_data():
         
     team_members = [
         {
+            "id": "member-1",
             "name": "Ashwin",
             "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ashwin&backgroundColor=b6e3f4",
             "load_score": 75,
             "mood_emoji": "⚡",
             "status_summary": "4 Meetings, 2 High Priority Tasks",
+            "on_leave": False,
+            "context_tags": "Payment API, Architecture",
             "tasks": [
                 {"id": 1, "title": "Refactor Payment API", "date": days[0], "status": "In Progress", "complexity": 4, "description": "Rewrite the payment processing logic."},
                 {"id": 2, "title": "API Docs", "date": days[0], "status": "To Do", "complexity": 2, "description": "Update swagger docs."},
@@ -29,11 +33,14 @@ def get_mock_data():
             ]
         },
         {
+            "id": "member-2",
             "name": "Lokesh",
             "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Lokesh&backgroundColor=ffdfbf",
             "load_score": 90,
             "mood_emoji": "🔥",
             "status_summary": "6 Meetings, 5 High Priority Tasks",
+            "on_leave": False,
+            "context_tags": "Database, CI/CD",
             "tasks": [
                 {"id": 5, "title": "Database Migration", "date": days[0], "status": "In Progress", "complexity": 5, "description": "Migrate users table to PostgreSQL."},
                 {"id": 6, "title": "Setup CI/CD", "date": days[0], "status": "To Do", "complexity": 3, "description": "Configure GitHub Actions."},
@@ -42,13 +49,40 @@ def get_mock_data():
             ]
         },
         {
+            "id": "member-3",
             "name": "Aarthi",
             "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Aarthi&backgroundColor=c0aede",
-            "load_score": 40,
-            "mood_emoji": "✨",
-            "status_summary": "2 Meetings, 1 High Priority Task",
+            "load_score": 0,
+            "mood_emoji": "🌴",
+            "status_summary": "On Leave (Out of Office)",
+            "on_leave": True,
+            "context_tags": "UI/UX, Frontend",
+            "tasks": []
+        },
+        {
+            "id": "member-4",
+            "name": "David",
+            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=David&backgroundColor=ffc0cb",
+            "load_score": 30,
+            "mood_emoji": "☕",
+            "status_summary": "1 Meeting, Code Review",
+            "on_leave": False,
+            "context_tags": "Security, Auth",
             "tasks": [
-                {"id": 9, "title": "UI Mockups", "date": days[2], "status": "In Progress", "complexity": 2, "description": "Design new dashboard components."}
+                {"id": 10, "title": "Security Audit", "date": days[0], "status": "In Progress", "complexity": 3, "description": "Review auth flows."}
+            ]
+        },
+        {
+            "id": "member-5",
+            "name": "Elena",
+            "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena&backgroundColor=d8bfd8",
+            "load_score": 50,
+            "mood_emoji": "🚀",
+            "status_summary": "Sprint Planning",
+            "on_leave": False,
+            "context_tags": "Product, Analytics",
+            "tasks": [
+                {"id": 11, "title": "Define KPIs", "date": days[1], "status": "To Do", "complexity": 2, "description": "Define Q3 metrics."}
             ]
         }
     ]
